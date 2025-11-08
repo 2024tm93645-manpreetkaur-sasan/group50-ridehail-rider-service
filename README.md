@@ -206,59 +206,52 @@ kubectl -n rhf logs deploy/rider-service
 ## Repo Layout 
 
 ```
-manpreetkaursasan@Manpreets-MacBook-Air group50-ridehail-rider-service % tree -L 7 -I 'build|.gradle|.idea'
-.
+group50-ridehail-rider-service/
 ├── README.md
 ├── docker-compose.yml
-├── elk
-│   ├── Dockerfile.logstash
-│   └── logstash.conf
-├── filebeat
-│   ├── Dockerfile.filebeat
-│   └── filebeat.yml
-├── k8s
-│   ├── elk
-│   │   ├── elasticsearch.yaml
-│   │   ├── filebeat-configmap.yaml
-│   │   ├── filebeat-daemonset.yaml
-│   │   ├── kibana.yaml
-│   │   └── logstash.yaml
-│   └── rider
-│       ├── configmap.yaml
-│       ├── deployment.yaml
-│       ├── postgres.yaml
-│       ├── secret.yaml
-│       └── service.yaml
-├── minikube-cleanup.sh
 ├── minikube-run.sh
-└── rider-service
-    ├── Dockerfile
-    ├── build.gradle
-    ├── docker-clean.sh
-    ├── docker-run.sh
-    ├── gradle
-    │   └── wrapper
-    │       ├── gradle-wrapper.jar
-    │       └── gradle-wrapper.properties
-    ├── gradlew
-    ├── gradlew.bat
-    ├── logs
-    ├── postman
-    │   └── rider-service.postman_collection.json
-    ├── settings.gradle
-    └── src
-        └── main
-            ├── java
-            │   └── com
-            │       └── rhf
-            │           └── rider
-            └── resources
-                ├── application-docker.yml
-                ├── application-minikube.yml
-                ├── application.yml
-                ├── logback-spring.xml
-                ├── rhfd_riders.csv
-                └── schema.sql
+├── minikube-cleanup.sh
+│
+├── rider-service/                   # Your Spring Boot service
+│   ├── Dockerfile
+│   ├── build.gradle
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── settings.gradle
+│   ├── src/
+│   │   ├── main/java/com/rhf/rider/...
+│   │   └── main/resources/
+│   │       ├── application.yml
+│   │       ├── application-docker.yml
+│   │       ├── application-minikube.yml
+│   │       ├── logback-spring.xml
+│   │       ├── schema.sql
+│   │       └── rhfd_riders.csv
+│   ├── logs/
+│   └── postman/
+│       └── rider-service.postman_collection.json
+│
+├── prometheus/                      # For Docker-only Prometheus setup
+│   └── prometheus.yml               # Prometheus config for docker-compose
+│
+├── k8s/
+│   ├── rider/                       # Rider service + Postgres manifests
+│   │   ├── configmap.yaml
+│   │   ├── deployment.yaml
+│   │   ├── service.yaml
+│   │   ├── postgres.yaml
+│   │   └── secret.yaml
+│   │
+│   └── prometheus/                  # Prometheus manifests for Minikube
+│       ├── prometheus-configmap.yaml
+│       ├── prometheus-deployment.yaml
+│       └── prometheus-service.yaml
+│
+└── scripts/                         # Utility or setup scripts
+    ├── db-init.sh                   # optional: for DB seeding
+    ├── build-all.sh
+    └── cleanup.sh
+
 
 ```
 

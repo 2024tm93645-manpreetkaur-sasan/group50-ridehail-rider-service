@@ -1,6 +1,11 @@
 server:
   port: 9081
 
+  trip:
+    service:
+      base-url: http://trip-service:9083/v1/trips
+
+
 spring:
   jpa:
     hibernate:
@@ -15,10 +20,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: always
+    prometheus:
+      enabled: true
+
+  metrics:
+    tags:
+      application: rider-service
 
 logging:
   level:

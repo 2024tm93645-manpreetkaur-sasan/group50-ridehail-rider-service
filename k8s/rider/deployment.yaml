@@ -14,42 +14,37 @@ spec:
     metadata:
       labels:
         app: rider-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9081"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: rider-service
           image: rider-service:latest
-          imagePullPolicy: Never
           ports:
             - containerPort: 9081
           envFrom:
             - configMapRef:
                 name: rider-config
             - secretRef:
-                name: rider-secrets
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: 9081
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: 9081
-            initialDelaySeconds: 20
-            periodSeconds: 20
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "256Mi"
-            limits:
-              cpu: "300m"
-              memory: "512Mi"
+                name: rider-secret
           volumeMounts:
             - name: rider-logs
               mountPath: /app/logs
       volumes:
         - name: rider-logs
-          hostPath:
-            path: /tmp/rider-logs
-            type: DirectoryOrCreate
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rider-service
+  namespace: rhf
+spec:
+  type: LoadBalancer
+  selector:
+    app: rider-service
+  ports:
+    - port: 9081
+      targetPort: 9081

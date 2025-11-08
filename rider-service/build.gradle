@@ -6,6 +6,7 @@ plugins {
 
 group = 'com.rhf'
 version = '0.0.1'
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
@@ -15,14 +16,22 @@ java {
 repositories { mavenCentral() }
 
 dependencies {
+    // Core Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // PostgreSQL driver
     runtimeOnly 'org.postgresql:postgresql:42.7.3'
+
+    // Structured JSON logging (Logback + MDC)
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+    // Micrometer Prometheus metrics
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
-//helpful for keeping code base clean
+// Enforce clean builds
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['-Xlint:deprecation','-Xlint:unchecked']
+    options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
 }

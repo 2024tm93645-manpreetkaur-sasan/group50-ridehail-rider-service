@@ -1,14 +1,3 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: rider-db-pvc
-  namespace: rhf
-spec:
-  accessModes: ["ReadWriteOnce"]
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,6 +6,7 @@ metadata:
   labels:
     app: rider-db
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: rider-db
@@ -28,21 +18,23 @@ spec:
       containers:
         - name: rider-db
           image: postgres:16
-          args: ["-p", "5434"]
           env:
             - name: POSTGRES_DB
               value: riderdb
             - name: POSTGRES_USER
               value: rider
             - name: POSTGRES_PASSWORD
-              value: riderpw
+              valueFrom:
+                secretKeyRef:
+                  name: rider-secret
+                  key: DB_PASSWORD
           ports:
             - containerPort: 5434
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: db-storage
+            - name: rider-db-storage
+              mountPath: /var/lib/postgresql/data
       volumes:
-        - name: db-storage
+        - name: rider-db-storage
           persistentVolumeClaim:
             claimName: rider-db-pvc
 ---
@@ -52,6 +44,7 @@ metadata:
   name: rider-db
   namespace: rhf
 spec:
+  type: ClusterIP
   selector:
     app: rider-db
   ports:

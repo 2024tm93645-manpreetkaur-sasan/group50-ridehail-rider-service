@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: rhf
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+    scrape_configs:
+      - job_name: 'rider-service'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['rider-service:9081']
