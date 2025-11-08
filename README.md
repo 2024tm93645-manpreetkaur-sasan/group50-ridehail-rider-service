@@ -170,9 +170,11 @@ eval $(minikube docker-env)
 kubectl -n rhf get pods
 kubectl -n rhf get svc
 
-# Port-forward Rider
-kubectl -n rhf port-forward svc/rider-service 9081:9081
-curl http://localhost:9081/v1/riders
+
+ kubectl patch svc rider-service -n rhf -p '{"spec": {"type": "LoadBalancer"}}'
+ kubectl patch svc kibana -n rhf -p '{"spec": {"type": "LoadBalancer"}}'
+#Open Tunnel 
+minikube tunnel -p rider-cluster
 ```
 
 ```bash
@@ -204,7 +206,59 @@ kubectl -n rhf logs deploy/rider-service
 ## Repo Layout 
 
 ```
+manpreetkaursasan@Manpreets-MacBook-Air group50-ridehail-rider-service % tree -L 7 -I 'build|.gradle|.idea'
 .
+├── README.md
+├── docker-compose.yml
+├── elk
+│   ├── Dockerfile.logstash
+│   └── logstash.conf
+├── filebeat
+│   ├── Dockerfile.filebeat
+│   └── filebeat.yml
+├── k8s
+│   ├── elk
+│   │   ├── elasticsearch.yaml
+│   │   ├── filebeat-configmap.yaml
+│   │   ├── filebeat-daemonset.yaml
+│   │   ├── kibana.yaml
+│   │   └── logstash.yaml
+│   └── rider
+│       ├── configmap.yaml
+│       ├── deployment.yaml
+│       ├── postgres.yaml
+│       ├── secret.yaml
+│       └── service.yaml
+├── minikube-cleanup.sh
+├── minikube-run.sh
+└── rider-service
+    ├── Dockerfile
+    ├── build.gradle
+    ├── docker-clean.sh
+    ├── docker-run.sh
+    ├── gradle
+    │   └── wrapper
+    │       ├── gradle-wrapper.jar
+    │       └── gradle-wrapper.properties
+    ├── gradlew
+    ├── gradlew.bat
+    ├── logs
+    ├── postman
+    │   └── rider-service.postman_collection.json
+    ├── settings.gradle
+    └── src
+        └── main
+            ├── java
+            │   └── com
+            │       └── rhf
+            │           └── rider
+            └── resources
+                ├── application-docker.yml
+                ├── application-minikube.yml
+                ├── application.yml
+                ├── logback-spring.xml
+                ├── rhfd_riders.csv
+                └── schema.sql
 
 ```
 

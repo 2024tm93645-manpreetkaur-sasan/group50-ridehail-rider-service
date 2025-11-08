@@ -1,0 +1,155 @@
+{
+  "info": {
+    "name": "Rider Service - Localhost",
+    "_postman_id": "b7b7a2b8-2c5c-4f67-b8d9-6a8df7d2c4c9",
+    "description": "CRUD endpoints for Rider microservice running locally (port 9081)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9081/actuator/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["actuator", "health"]
+        }
+      }
+    },
+    {
+      "name": "Get All Riders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders"]
+        }
+      }
+    },
+    {
+      "name": "Get Rider by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders", "1"]
+        }
+      }
+    },
+    {
+      "name": "Create Rider",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Rider New\",\n    \"email\": \"ridernew@mail.com\",\n    \"phone\": \"9876543210\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders"]
+        }
+      }
+    },
+    {
+      "name": "Update Rider (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Rider Updated\",\n    \"email\": \"riderupdated@mail.com\",\n    \"phone\": \"9876543210\",\n    \"active\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders", "1"]
+        }
+      }
+    },
+    {
+      "name": "Partial Update Rider (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"patchedrider@mail.com\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders", "1"]
+        }
+      }
+    },
+    {
+      "name": "Delete Rider",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders", "1"]
+        }
+      }
+    },
+    {
+      "name": "Search Rider by Email",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9081/api/v1/riders/search?email=rider1132@mail.com",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["api", "v1", "riders", "search"],
+          "query": [
+            {
+              "key": "email",
+              "value": "rider1132@mail.com"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
