@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rider-service
+  namespace: rhf
+  labels:
+    app: rider-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rider-service
+  template:
+    metadata:
+      labels:
+        app: rider-service
+    spec:
+      containers:
+        - name: rider-service
+          image: rider-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9081
+          envFrom:
+            - configMapRef:
+                name: rider-config
+            - secretRef:
+                name: rider-secrets
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9081
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: rider-logs
+              mountPath: /app/logs
+      volumes:
+        - name: rider-logs
+          hostPath:
+            path: /tmp/rider-logs
+            type: DirectoryOrCreate

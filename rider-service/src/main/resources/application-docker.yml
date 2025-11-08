@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://rider-db:5434/riderdb
+    username: rider
+    password: riderpw

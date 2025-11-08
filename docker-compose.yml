@@ -1,0 +1,102 @@
+{
+  "services": {
+    "rider-db": {
+      "image": "postgres:16-alpine",
+      "container_name": "rider-db",
+      "environment": {
+        "POSTGRES_DB": "riderdb",
+        "POSTGRES_USER": "rider",
+        "POSTGRES_PASSWORD": "riderpw"
+      },
+      "ports": [
+        "5544:5434"
+      ],
+      "volumes": [
+        "rider_db_data:/var/lib/postgresql/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "pg_isready -U rider -d riderdb"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 5
+      }
+    },
+    "logstash": {
+      "build": {
+        "context": "./elk",
+        "dockerfile": "Dockerfile.logstash"
+      },
+      "container_name": "logstash",
+      "ports": [
+        "5044:5044"
+      ],
+      "volumes": [
+        "./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
+      ]
+    },
+    "elasticsearch": {
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:8.15.2",
+      "environment": {
+        "discovery.type": "single-node",
+        "xpack.security.enabled": "false",
+        "ES_JAVA_OPTS": "-Xms512m -Xmx512m"
+      },
+      "ports": [
+        "9201:9200"
+      ]
+    },
+    "kibana": {
+      "image": "docker.elastic.co/kibana/kibana:8.15.2",
+      "environment": {
+        "ELASTICSEARCH_HOSTS": "http://elasticsearch:9200"
+      },
+      "ports": [
+        "5602:5601"
+      ],
+      "depends_on": [
+        "elasticsearch"
+      ]
+    },
+    "rider-service": {
+      "build": {
+        "context": "./rider-service"
+      },
+      "container_name": "rider-service",
+      "depends_on": [
+        "rider-db",
+        "logstash"
+      ],
+      "environment": {
+        "SPRING_DATASOURCE_URL": "jdbc:postgresql://rider-db:5434/riderdb",
+        "SPRING_DATASOURCE_USERNAME": "rider",
+        "SPRING_DATASOURCE_PASSWORD": "riderpw",
+        "SPRING_PROFILES_ACTIVE": "docker"
+      },
+      "ports": [
+        "9081:9081"
+      ],
+      "volumes": [
+        "./rider-service/logs:/app/logs"
+      ]
+    },
+    "filebeat": {
+      "build": {
+        "context": "./filebeat",
+        "dockerfile": "Dockerfile.filebeat"
+      },
+      "container_name": "filebeat",
+      "depends_on": [
+        "logstash"
+      ],
+      "volumes": [
+        "./rider-service/logs:/logs"
+      ]
+    }
+  },
+  "volumes": {
+    "rider_db_data": {}
+  }
+}

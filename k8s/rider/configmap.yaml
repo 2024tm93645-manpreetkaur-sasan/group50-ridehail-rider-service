@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rider-config
+  namespace: rhf
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://rider-db:5434/riderdb
+  SPRING_DATASOURCE_USERNAME: rider
+  SPRING_DATASOURCE_PASSWORD: riderpw
+  SPRING_PROFILES_ACTIVE: minikube
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
