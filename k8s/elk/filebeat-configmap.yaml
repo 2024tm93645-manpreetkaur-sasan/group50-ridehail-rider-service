@@ -9,15 +9,43 @@ data:
       - type: log
         enabled: true
         paths:
-          - /app/logs/*.json
+          - /app/rider-logs/*.json
         json.keys_under_root: true
         json.add_error_key: true
-        json.message_key: message
+        fields:
+          service: rider-service
 
-    output.logstash:
-      hosts: ["logstash:5044"]
+      - type: log
+        enabled: true
+        paths:
+          - /app/driver-logs/*.json
+        json.keys_under_root: true
+        json.add_error_key: true
+        fields:
+          service: driver-service
+
+      - type: log
+        enabled: true
+        paths:
+          - /app/payment-logs/*.json
+        json.keys_under_root: true
+        json.add_error_key: true
+        fields:
+          service: payment-service
+
+      - type: log
+        enabled: true
+        paths:
+          - /app/trip-logs/*.json
+        json.keys_under_root: true
+        json.add_error_key: true
+        fields:
+          service: trip-service
 
     processors:
       - add_host_metadata: ~
-      - add_kubernetes_metadata:
-          in_cluster: true
+      - add_cloud_metadata: ~
+      - add_docker_metadata: ~
+
+    output.logstash:
+      hosts: ["logstash:5044"]

@@ -3,13 +3,16 @@ kind: DaemonSet
 metadata:
   name: filebeat
   namespace: rhf
-  labels: { app: filebeat }
+  labels:
+    app: filebeat
 spec:
   selector:
-    matchLabels: { app: filebeat }
+    matchLabels:
+      app: filebeat
   template:
     metadata:
-      labels: { app: filebeat }
+      labels:
+        app: filebeat
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 30
@@ -23,12 +26,27 @@ spec:
             - name: config
               mountPath: /etc/filebeat.yml
               subPath: filebeat.yml
-            - name: applogs
-              mountPath: /app/logs
+            - name: riderlogs
+              mountPath: /app/rider-logs
+            - name: driverlogs
+              mountPath: /app/driver-logs
+            - name: paymentlogs
+              mountPath: /app/payment-logs
+            - name: triplogs
+              mountPath: /app/trip-logs
       volumes:
         - name: config
           configMap:
             name: filebeat-config
-        - name: applogs
+        - name: riderlogs
           hostPath:
             path: /tmp/rider-logs
+        - name: driverlogs
+          hostPath:
+            path: /tmp/driver-logs
+        - name: paymentlogs
+          hostPath:
+            path: /tmp/payment-logs
+        - name: triplogs
+          hostPath:
+            path: /tmp/trip-logs
