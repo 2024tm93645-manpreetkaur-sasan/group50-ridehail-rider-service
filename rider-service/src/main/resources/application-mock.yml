@@ -1,7 +1,0 @@
-spring:
-  profiles:
-    active: mock
-
-trip:
-  service:
-    base-url: http://localhost:9083/v1/trips

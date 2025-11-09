@@ -2,6 +2,7 @@ package com.rhf.rider.controller;
 
 import com.rhf.rider.entity.Rider;
 import com.rhf.rider.service.RiderService;
+import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,17 +49,17 @@ public class RiderController {
     }
 
     @PostMapping
-    public ResponseEntity<Rider> create(@RequestBody Rider rider) {
-        Rider saved = riderService.save(rider);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<Rider> create(@Valid @RequestBody Rider rider) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(riderService.save(rider));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Rider> update(@PathVariable Long id, @RequestBody Rider rider) {
+    public ResponseEntity<Rider> update(@PathVariable Long id, @Valid @RequestBody Rider rider) {
         return riderService.update(id, rider)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     @PatchMapping("/{id}")
     public ResponseEntity<Rider> patch(@PathVariable Long id, @RequestBody Map<String, Object> fields) {

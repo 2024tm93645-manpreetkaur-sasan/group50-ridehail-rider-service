@@ -1,6 +1,8 @@
 package com.rhf.rider.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 import java.time.Instant;
 
 @Entity
@@ -12,9 +14,22 @@ public class Rider {
     @Column(name = "rider_id", nullable = false, updatable = false)
     private Long riderId;
 
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 50, message = "Name must be between 2–50 characters")
     private String name;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
+
+    @NotBlank(message = "Phone number is required")
+    @Pattern(
+            regexp = "^[0-9]{10}$",
+            message = "Phone number must be exactly 10 digits"
+    )
     private String phone;
+
+    @NotNull(message = "Active status is required")
     private Boolean active;
 
     @Column(name = "created_at", updatable = false)
@@ -32,7 +47,10 @@ public class Rider {
     }
 
     @PreUpdate
-    void onUpdate() { updatedAt = Instant.now(); }
+    void onUpdate() {
+        updatedAt = Instant.now();
+    }
+
 
     public Long getRiderId() { return riderId; }
     public void setRiderId(Long riderId) { this.riderId = riderId; }

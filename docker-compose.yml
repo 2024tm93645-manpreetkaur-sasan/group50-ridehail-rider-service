@@ -38,18 +38,6 @@ services:
       - ./rider-service/logs:/app/logs
     restart: always
 
-  # --- Prometheus (for metrics & observability) ---
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/dashboards:/etc/prometheus/dashboards
-    ports:
-      - "9090:9090"
-    depends_on:
-      - rider-service
-    restart: always
 
 volumes:
   rider_db_data:
