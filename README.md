@@ -1,273 +1,168 @@
 # Rider Service
 
-> Tech Stack : 
-Gradle  
-Java 25  
-Spring Boot 3.5+  
-Docker  
-Docker Compose  
-PostgreSQL  
-Minikube  
-JSON logs  
-ELK 
-No UI(Postman Client)
+A lightweight Spring Boot microservice for managing rider information.
+
+> **Tech Stack:**
+> Java 25 • Spring Boot 3.5+ • Gradle • Docker • Docker Compose • PostgreSQL 
+> 
+> JSON Logging • Correlation ID Filter
+> 
+> No UI (use Postman / curl)
 
 ---
 
-## Quickstart (Local with Docker Compose)
+#  Quickstart — Run Locally (Docker Only)
 
 ```bash
-# 1) Build Rider service image
+# 0) Stop & clean previous stack (recommended)
+docker compose down -v
+```
+
+```bash
+# 1) Build Rider Service JAR
 cd rider-service
 ./gradlew clean bootJar
-docker build -t rhf/rider-service:latest .
+```
+
+```bash
+# 2) Build Docker image (fresh build)
+docker build --no-cache -t rhf/rider-service:latest .
 cd ..
+```
 
-# 2) Bring up DB + Rider + ELK (non-default ports used)
+```bash
+# 3) Start Rider Service + PostgreSQL
 docker compose up -d
+```
 
-# 3) Health check
+```bash
+# 4) Check if service is running
 curl http://localhost:9081/actuator/health
+```
 
-# 4) Try APIs
+```bash
+# 5) List riders
 curl http://localhost:9081/v1/riders
 ```
 
-Ports chosen:
-- Rider service: **9081**
-- Rider DB (Postgres inside container 5432) published on host **5544**
-- Elasticsearch: **9201**
-- Kibana: **5602**
-- Logstash (TCP): **5044**
+---
 
-Seed data: `rider-service/src/main/resources/rhfd_riders.csv` is ingested on first boot.
+#  Exposed Ports
+
+| Component     | Port     | Description                |
+| ------------- |----------|----------------------------|
+| Rider Service | **9081** | REST API                   |
+| PostgreSQL    | **5438** | Container 5432 → Host 5438 |
 
 ---
 
-## Postman Collection
+#  API Endpoints
 
-Import `postman/RiderService.postman_collection.json` and hit:
-- `GET /v1/riders`
-- `GET /v1/riders/{id}`
-- `POST /v1/riders`
-- `PUT /v1/riders/{id}`
-- `DELETE /v1/riders/{id}`
+### **Health**
 
-Base URL env: `http://localhost:9081`
-
----
-
-## Minimal Architecture (Phase 1)
-
-```mermaid
-flowchart LR
-    subgraph Rider Service
-      RAPI[Rider REST API] --> RSVC[Rider Service Layer] --> RDB[(Rider DB)]
-    end
-    subgraph Driver Service
-      DAPI --> DDB[(Driver DB)]
-    end
-    subgraph Trip Service
-      TAPI --> TDB[(Trip DB)]
-    end
-    subgraph Payment Service
-      PAPI --> PDB[(Payment DB)]
-    end
-
-    RAPI <-- REST --> TAPI
-    TAPI <-- REST --> DAPI
-    TAPI <-- REST --> PAPI
+```
+GET /actuator/health
+GET /actuator/info
 ```
 
-Database-per-service pattern; no cross-DB joins.
+### **Rider CRUD**
 
----
-
-## Rider ER (minimal)
-
-```mermaid
-erDiagram
-    RIDER {
-      UUID id PK
-      string name
-      string email
-      string phone
-      string created_at
-      string updated_at
-      boolean active
-    }
+```
+GET    /v1/riders
+GET    /v1/riders/{id}
+POST   /v1/riders
+PUT    /v1/riders/{id}
+DELETE /v1/riders/{id}
 ```
 
----
-
-## Rider Workflow (simple)
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant RiderAPI as Rider Service
-    participant RDB as Rider DB
-
-    Client->>RiderAPI: POST /v1/riders
-    RiderAPI->>RDB: insert rider
-    RiderAPI-->>Client: 201 Created
-
-    Client->>RiderAPI: GET /v1/riders/{id}
-    RiderAPI->>RDB: select by id
-    RiderAPI-->>Client: 200 OK (JSON)
-```
+**Content-Type:** application/json
 
 ---
 
-## JSON Logs + ELK (Filebeat Pipeline)
+#  Sample Requests
 
-- Each Spring Boot service writes structured JSON logs to rotating files under `/app/logs` using a Logback RollingFileAppender.
-- **Filebeat** runs as a sidecar/companion container, tails these JSON log files, and forwards them to **Logstash** on port `5044`.
-- **Logstash** parses and sends logs to **Elasticsearch**, where they are indexed.
-- You can explore and visualize logs in **Kibana** at [http://localhost:5602](http://localhost:5602).
-
-**Flow overview:**
-Spring Boot → RollingFileAppender (JSON) → Filebeat → Logstash :5044 → Elasticsearch → Kibana
-
-
-Bring up stack:
-```bash
-docker compose up -d
-# Then open Kibana and add index pattern: logstash-*
-```
-
----
-
-## Minikube (Beginner Steps)
+###  Create Rider
 
 ```bash
-
-cd rider-service
-#rebuild image 
-docker build -t rider-service:latest .
-
-#check image 
-docker images | grep rider-service
-# Start cluster
-minikube start
-
-kubectl get nodes
-
-
-# Create namespace
-kubectl create ns rhf
-
-# Apply rider k8s
-kubectl apply -n rhf -f k8s/rider/
-# Point Docker CLI to Minikube’s environment
-eval $(minikube docker-env)
-
-
-
-
-
-# See pods and services
-kubectl -n rhf get pods
-kubectl -n rhf get svc
-
-
- kubectl patch svc rider-service -n rhf -p '{"spec": {"type": "LoadBalancer"}}'
- kubectl patch svc kibana -n rhf -p '{"spec": {"type": "LoadBalancer"}}'
-#Open Tunnel 
-minikube tunnel -p rider-cluster
+curl -X POST http://localhost:9081/v1/riders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "555-1001"
+  }'
 ```
 
+###  Get All Riders
+
 ```bash
-minikube dashboard
+curl http://localhost:9081/v1/riders
 ```
-This opens a web UI for Pods/Deployments/Services. Alternative TUI: `k9s`. GUI: `Octant`.
 
----
-
-## Commands Cheat Sheet
+### Update Rider
 
 ```bash
-# Build
-cd rider-service && ./gradlew clean build
-
-# Run Rider only (local dev profile uses localhost DB port 5544)
-SPRING_PROFILES_ACTIVE=local java -jar build/libs/rider-service-*.jar
-
-# Docker Compose logs
-docker compose logs -f rider-service
-
-# Kubernetes basics
-kubectl -n rhf get pods
-kubectl -n rhf logs deploy/rider-service
+curl -X PUT http://localhost:9081/v1/riders/{id} \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Name",
+    "email": "x@y.com",
+    "phone": "123"
+  }'
 ```
 
 ---
 
-## Repo Layout 
+#  JSON Logging + Correlation ID
 
+Your service emits **structured JSON logs**, e.g.:
+
+```json
+{
+  "timestamp": "2025-02-09T12:44:23Z",
+  "level": "INFO",
+  "correlationId": "f7a9012b-8ac0-4c90-8d3e-19b4c03bff80",
+  "service": "rider-service",
+  "method": "GET",
+  "path": "/v1/riders",
+  "status": 200,
+  "durationMs": 12
+}
 ```
-group50-ridehail-rider-service/
-├── README.md
-├── docker-compose.yml
-├── minikube-run.sh
-├── minikube-cleanup.sh
-│
-├── rider-service/                   # Your Spring Boot service
-│   ├── Dockerfile
-│   ├── build.gradle
-│   ├── gradlew
-│   ├── gradlew.bat
-│   ├── settings.gradle
-│   ├── src/
-│   │   ├── main/java/com/rhf/rider/...
-│   │   └── main/resources/
-│   │       ├── application.yml
-│   │       ├── application-docker.yml
-│   │       ├── application-minikube.yml
-│   │       ├── logback-spring.xml
-│   │       ├── schema.sql
-│   │       └── rhfd_riders.csv
-│   ├── logs/
-│   └── postman/
-│       └── rider-service.postman_collection.json
-│
-├── prometheus/                      # For Docker-only Prometheus setup
-│   └── prometheus.yml               # Prometheus config for docker-compose
-│
-├── k8s/
-│   ├── rider/                       # Rider service + Postgres manifests
-│   │   ├── configmap.yaml
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   ├── postgres.yaml
-│   │   └── secret.yaml
-│   │
-│   └── prometheus/                  # Prometheus manifests for Minikube
-│       ├── prometheus-configmap.yaml
-│       ├── prometheus-deployment.yaml
-│       └── prometheus-service.yaml
-│
-└── scripts/                         # Utility or setup scripts
-    ├── db-init.sh                   # optional: for DB seeding
-    ├── build-all.sh
-    └── cleanup.sh
 
+### Correlation ID Behavior
 
-```
+* If the client sends `X-Correlation-Id`, the service uses it.
+* If not provided, the service **generates** a new UUID.
+* Log entries and downstream operations all include this ID.
+
+Useful for debugging distributed transactions.
 
 ---
 
-Run:
-```bash
-docker compose up -d
-# Then in Kibana, add index pattern: logstash-*
+#  Database
+
+### Auto-seeded CSV
+
+On first startup, the service loads:
+
+```
+rider-service/src/main/resources/rhfd_riders.csv
 ```
 
+### Schema
 
-Rider Service → /app/logs/rider-service.json → Host path /tmp/rider-logs
-↑
-Shared via volume
-↓
-Filebeat DaemonSet (reads same /tmp/rider-logs)
-↓
-Logstash → Elasticsearch → Kibana
+Created automatically via `schema.sql`.
+
+---
+
+#  Docker Compose Commands
+
+```bash
+docker compose up -d              # start stack
+docker compose down -v            # stop + remove volumes
+docker compose logs -f rider-service   # follow logs
+docker exec -it rider-db psql -U rider -d riderdb   # DB shell
+```
+
+---

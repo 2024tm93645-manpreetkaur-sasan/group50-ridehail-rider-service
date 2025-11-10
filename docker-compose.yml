@@ -3,14 +3,17 @@ version: "3.9"
 services:
   # --- PostgreSQL Database ---
   rider-db:
-    image: postgres:16-alpine
+    build:
+      context: ./rider-service
+      dockerfile: Dockerfile.rider-db
+    image: rider-db:1.0
     container_name: rider-db
     environment:
       POSTGRES_DB: riderdb
       POSTGRES_USER: rider
       POSTGRES_PASSWORD: riderpw
     ports:
-      - "5544:5432"
+      - "5438:5432"
     volumes:
       - rider_db_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,6 +26,8 @@ services:
   rider-service:
     build:
       context: ./rider-service
+      dockerfile: Dockerfile.rider-service
+    image : rider-service:latest
     container_name: rider-service
     depends_on:
       rider-db:
