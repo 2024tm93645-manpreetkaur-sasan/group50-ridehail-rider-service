@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "Rider Service - Trip Endpoints",
+    "_postman_id": "c4d9b470-bdb6-4ef6-bf3a-1f54f80252b0",
+    "description": "Test collection for Rider → Trip Service endpoints (request and cancel trips)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Request Trip",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Correlation-Id",
+            "value": "test-corr-id-123"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pickupLocation\": \"Downtown Station\",\n  \"dropoffLocation\": \"Airport Terminal 3\",\n  \"paymentMethod\": \"CREDIT_CARD\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9081/v1/riders/1/trips",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["v1", "riders", "1", "trips"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel Trip",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Correlation-Id",
+            "value": "test-corr-id-456"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:9081/v1/riders/1/trips/abc123/cancel",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9081",
+          "path": ["v1", "riders", "1", "trips", "abc123", "cancel"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9081"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+server:
+  port: 9081
+
+  trip:
+    service:
+      base-url: http://localhost:9082/v1/trips
+
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+
+  metrics:
+    tags:
+      application: rider-service
+
+logging:
+  level:
+    root: INFO

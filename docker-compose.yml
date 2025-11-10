@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  # --- PostgreSQL Database ---
+  rider-db:
+    build:
+      context: ./rider-service
+      dockerfile: Dockerfile.rider-db
+    image: rider-db:1.0
+    container_name: rider-db
+    environment:
+      POSTGRES_DB: riderdb
+      POSTGRES_USER: rider
+      POSTGRES_PASSWORD: riderpw
+    ports:
+      - "5438:5432"
+    volumes:
+      - rider_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rider -d riderdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- Rider Service ---
+  rider-service:
+    build:
+      context: ./rider-service
+      dockerfile: Dockerfile.rider-service
+    image : rider-service:latest
+    container_name: rider-service
+    depends_on:
+      rider-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rider-db:5432/riderdb
+      SPRING_DATASOURCE_USERNAME: rider
+      SPRING_DATASOURCE_PASSWORD: riderpw
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "9081:9081"
+    volumes:
+      - ./rider-service/logs:/app/logs
+    restart: always
+
+
+volumes:
+  rider_db_data:

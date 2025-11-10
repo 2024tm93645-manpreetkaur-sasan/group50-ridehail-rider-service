@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "Rider Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:9081/actuator/health"
+      }
+    },
+    {
+      "name": "List Riders",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:9081/v1/riders"
+      }
+    },
+    {
+      "name": "Get Rider By ID",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:9081/v1/riders/1"
+      }
+    },
+    {
+      "name": "Search by Email",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:9081/v1/riders/search?email=rider1@mail.com"
+      }
+    },
+    {
+      "name": "Search by Name",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:9081/v1/riders/search?name=Rider"
+      }
+    },
+    {
+      "name": "Search by Phone",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:9081/v1/riders/search?phone=9991112222"
+      }
+    },
+    {
+      "name": "Create Rider",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"New Rider\", \"email\": \"new.rider@mail.com\", \"phone\": \"9998887777\", \"active\": true}"
+        },
+        "url": "http://localhost:9081/v1/riders"
+      }
+    },
+    {
+      "name": "Update Rider (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Rider Updated\", \"email\": \"new.rider@mail.com\", \"phone\": \"9998887777\", \"active\": true}"
+        },
+        "url": "http://localhost:9081/v1/riders/1"
+      }
+    },
+    {
+      "name": "Partial Update Rider (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"phone\": \"1112223333\"}"
+        },
+        "url": "http://localhost:9081/v1/riders/1"
+      }
+    },
+    {
+      "name": "Delete Rider",
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:9081/v1/riders/1"
+      }
+    }
+  ]
+}
